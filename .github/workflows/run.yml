@@ -8,15 +8,12 @@ on:
         required: true
         type: string
 
-  repository_dispatch:
-    types: [check]
-
 jobs:
   run:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Python
@@ -31,15 +28,14 @@ jobs:
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
+          CERT: ${{ inputs.cert }}
         run: |
-          echo "Manual input cert: ${{ inputs.cert }}"
-          echo "API payload cert: ${{ github.event.client_payload.cert }}"
-          
-          CERT="${{ inputs.cert }}"
+          set -x
+          echo "CERT from env: $CERT"
+
           if [ -z "$CERT" ]; then
-            CERT="${{ github.event.client_payload.cert }}"
+            echo "❌ CERT is empty"
+            exit 1
           fi
-          
-          echo "Using cert: $CERT"
-          
+
           python check_pacl.py "$CERT"
