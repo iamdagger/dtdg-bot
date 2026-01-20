@@ -23,7 +23,9 @@ jobs:
 
       - run: pip install requests beautifulsoup4
 
-      - run: python check_pacl.py "${{ github.event.client_payload.cert }}"
+      - run: |
+          CERT="${{ github.event.inputs.cert || github.event.client_payload.cert }}"
+          python check_pacl.py "$CERT"
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
