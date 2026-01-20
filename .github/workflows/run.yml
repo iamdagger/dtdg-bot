@@ -6,6 +6,7 @@ on:
       cert:
         description: "PACL Certificate Number (UXXXXXXXX)"
         required: true
+        type: string
 
   repository_dispatch:
     types: [check]
@@ -15,17 +16,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - run: pip install requests beautifulsoup4
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4
 
-      - run: |
-          CERT="${{ github.event.inputs.cert || github.event.client_payload.cert }}"
-          python check_pacl.py "$CERT"
+      - name: Run PACL checker
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
+        run: |
+          echo "Manual input cert: ${{ inputs.cert }}"
+          echo "API payload cert: ${{ github.event.client_payload.cert }}"
+          
+          CERT="${{ inputs.cert }}"
+          if [ -z "$CERT" ]; then
+            CERT="${{ github.event.client_payload.cert }}"
+          fi
+          
+          echo "Using cert: $CERT"
+          
+          python check_pacl.py "$CERT"
