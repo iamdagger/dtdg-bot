@@ -1,6 +1,12 @@
 name: PACL Checker
 
 on:
+  workflow_dispatch:
+    inputs:
+      cert:
+        description: "PACL Certificate Number (UXXXXXXXX)"
+        required: true
+
   repository_dispatch:
     types: [check]
 
